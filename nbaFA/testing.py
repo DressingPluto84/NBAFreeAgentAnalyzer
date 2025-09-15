@@ -107,18 +107,31 @@ def getTeamRating(team: str):
 
     return -1
 
-def getNextOpponents(team: str):
-    games = []
+def getNextOpponents(team: str, start: date, numDays: int):
     url = f"https://www.basketball-reference.com/teams/{team}/2025_games.html"
+    general = pd.read_html(url)[0]
     dates = pd.read_html(url)[0]['Date']
+    toDrop = []
     for i in range(len(dates)):
         if 'Date' in dates[i]:
-            dates.drop(index=i)
-    print(len(dates))
+            toDrop.append(i)
+    dates.drop(index=toDrop, inplace=True)
+    general.drop(index=toDrop, inplace=True)
+    dates = dates.reset_index(drop=True)
+    general = general.reset_index(drop=True)
 
+    i = 0
+    while i < len(dates) and start.strftime("%b %-d, %Y") not in dates[i]:
+        i += 1
+    start += timedelta(days=numDays)
+    beginning = i
+    while i < len(dates) and datetime.strptime(dates[i][5:], "%b %d, %Y").date() < start:
+        i += 1
+    games = general['Opponent'][beginning:i]
 
+    return games
 
-def bibimbap():
+def mainTestLoop():
     nameOfPlayer = input("Enter name of player: ")
 
     nameOfPlayer = nameOfPlayer.lower().split(" ")
@@ -139,4 +152,5 @@ myDate = datetime.strptime(x, "%b %d, %Y").date()
 print(myDate.strftime("%b %d, %Y"))
 """
 
-getNextOpponents("OKC")
+myDate = datetime.strptime("Dec 19, 2024", "%b %d, %Y").date()
+print(getNextOpponents("OKC", myDate, 5))
