@@ -2,6 +2,13 @@ from typing import Dict
 import pandas as pd
 from datetime import date, datetime, timedelta
 
+
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/120.0.0.0 Safari/537.36"
+}
+
 def calculatePastNGamesFantasy(nameOfPlayer: str, numOfGames: int):
     try:
         url = f"https://www.basketball-reference.com/players/j/{nameOfPlayer}/gamelog/2025"
@@ -44,7 +51,7 @@ def calculatePastNGamesFantasy(nameOfPlayer: str, numOfGames: int):
 def countGames(arr):
     games = 0
 
-    for i in range(len(arr) - 1):
+    for i in range(len(arr)):
         try:
             float(arr[i])
             games += 1
@@ -56,9 +63,9 @@ def countGames(arr):
 def sumCategory(arr):
     cat = 0
 
-    for i in range(len(arr) - 1):
+    for i in range(len(arr)):
         try:
-            val = float(arr[i])
+            val = int(arr[i])
             cat += val
         except:
             continue
@@ -131,16 +138,19 @@ def getNextOpponents(team: str, start: date, numDays: int):
 
     return games
 
-def mainTestLoop():
-    nameOfPlayer = input("Enter name of player: ")
-
+def getPlayerBBName(nameOfPlayer):
     nameOfPlayer = nameOfPlayer.lower().split(" ")
-    numOfGames = input("Enter number of past games to examine: ")
-    numOfGames = int(numOfGames) + 1
     start = ""
     start += nameOfPlayer[1][:5]
     start += nameOfPlayer[0][:2]
     start += "01"
+    return start
+
+def mainTestLoop():
+    nameOfPlayer = input("Enter name of player: ")
+    numOfGames = input("Enter number of past games to examine: ")
+    numOfGames = int(numOfGames) + 1
+    start = getPlayerBBName(nameOfPlayer)
     print(calculatePastNGamesFantasy(start, numOfGames))
 
 """
@@ -152,5 +162,5 @@ myDate = datetime.strptime(x, "%b %d, %Y").date()
 print(myDate.strftime("%b %d, %Y"))
 """
 
-myDate = datetime.strptime("Dec 19, 2024", "%b %d, %Y").date()
-print(getNextOpponents("OKC", myDate, 5))
+#myDate = datetime.strptime("Dec 19, 2024", "%b %d, %Y").date()
+#print(getNextOpponents("OKC", myDate, 5))
