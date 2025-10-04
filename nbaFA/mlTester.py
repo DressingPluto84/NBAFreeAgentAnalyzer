@@ -123,38 +123,39 @@ def getTeamName(abb):
 def getOpps():
     return ds['Opp']
 
-lst = getPlayers()
-opps = getOpps()
-opps = opps[opps.notna()]
-opps = opps[opps != 'Opp']
-opps = opps.replace('PHO', 'PHX')
-opps = opps.replace('BRK', 'BKN')
-opps = opps.replace('CHO', 'CHA')
-with open('/Users/ankul/Documents/myPlayers0.csv', 'a') as f:
-    off = 0
-    for i in range(20):
-        tot = 0
-        for j in range(3):
-            gang = off + j
-            voodd = getTeamName(opps.iloc[gang])
-            tot += gtt(voodd)
-        tot /= 3
-        calcL = calcOne(off)
-        s = f"Zach Lavine, {calc(off)}, {gtt('Chicago Bulls')}, {tot}, {calcL},"
-        s += "\n"
-        f.write(s)
-        off += 3
-    f.close()
+# lst = getPlayers()
+# opps = getOpps()
+# opps = opps[opps.notna()]
+# opps = opps[opps != 'Opp']
+# opps = opps.replace('PHO', 'PHX')
+# opps = opps.replace('BRK', 'BKN')
+# opps = opps.replace('CHO', 'CHA')
+# with open('/Users/ankul/Documents/myPlayers0.csv', 'a') as f:
+#     off = 0
+#     for i in range(20):
+#         tot = 0
+#         for j in range(3):
+#             gang = off + j
+#             voodd = getTeamName(opps.iloc[gang])
+#             tot += gtt(voodd)
+#         tot /= 3
+#         calcL = calcOne(off)
+#         s = f"Zach Lavine, {calc(off)}, {gtt('Chicago Bulls')}, {tot}, {calcL},"
+#         s += "\n"
+#         f.write(s)
+#         off += 3
+#     f.close()
+#
+#
+# tot = 0
+# off = 7
+# for j in range(3):
+#     gang = off + j
+#     voodd = getTeamName(opps.iloc[gang])
+#     tot += gtt(voodd)
+# tot /= 3
+# print(calc(off))
+# print(gtt('Charlotte Hornets'))
+# print(tot)
+# print(calcOne(off))
 
-
-tot = 0
-off = 7
-for j in range(3):
-    gang = off + j
-    voodd = getTeamName(opps.iloc[gang])
-    tot += gtt(voodd)
-tot /= 3
-print(calc(off))
-print(gtt('Charlotte Hornets'))
-print(tot)
-print(calcOne(off))

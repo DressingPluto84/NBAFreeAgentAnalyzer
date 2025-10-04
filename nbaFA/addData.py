@@ -5,6 +5,23 @@ import random
 from unidecode import unidecode
 
 f = open('/Users/ankul/Documents/myPlayers0.csv', 'a')
+url = "https://www.basketball-reference.com/leagues/NBA_2025_totals.html"
+plays = pd.read_html(url)[0]
+plays = plays[plays["Team"] != "2TM"]
+plays = plays[plays["Team"] != "3TM"]
+plays = plays[plays["Player"] != "Player"]
+plays = plays[["Player", "Team"]]
+plays = plays.drop_duplicates(subset="Player", keep="first")[:250]
+for play in range(len(plays)):
+    plays.iloc[play].values[0] = unidecode(plays.iloc[play].values[0])
+
+playerDic = dict(zip(plays["Player"], plays["Team"]))
+
+dicTeamsStrength = {}
+url = "https://www.basketball-reference.com/leagues/NBA_2025.html"
+tab = pd.read_html(url)[10]
+for i in tab.values[:len(tab.values) - 1]:
+    dicTeamsStrength[i[1].replace("*", "")] = [i[11], i[23], i[24], i[25], i[26]]
 
 nba_teams = {
         "ATL": "Atlanta Hawks",
@@ -38,6 +55,12 @@ nba_teams = {
         "UTA": "Utah Jazz",
         "WAS": "Washington Wizards"
     }
+
+def getTeamFromPlayer(player: str):
+    return getTeamName(playerDic[player])
+
+def getTeamAdvStats(player: str):
+    return dicTeamsStrength[getTeamFromPlayer(player)]
 
 def addStuff(player, team, val):
     bbn = t.getPlayerBBName(player)
@@ -149,32 +172,26 @@ def gtt(team: str, dataEast, dataWest):
 def getTeamName(abb):
     return nba_teams[abb]
 
-url = "https://www.basketball-reference.com/leagues/NBA_2025_totals.html"
-plays = pd.read_html(url)[0]
-plays = plays[plays["Team"] != "2TM"]
-plays = plays[plays["Team"] != "3TM"]
-plays = plays[plays["Player"] != "Player"]
-plays = plays[["Player", "Team"]]
-plays = plays.drop_duplicates(subset="Player", keep="first")[:250]
 
-for play in range(len(plays)):
-    plays.iloc[play].values[0] = unidecode(plays.iloc[play].values[0])
+lstOfExtraStats = []
+playerCSV = pd.read_csv("/Users/ankul/Documents/myPlayers.csv")
+bbn = t.getPlayerBBName("")
+offset = 0
+url = f"https://www.basketball-reference.com/players/j/{bbn}/gamelog/2025"
 
-playerDic = dict(zip(plays["Player"], plays["Team"]))
-
-for player in playerDic:
-    if playerDic[player] == "PHO":
-        playerDic[player] = "PHX"
-    elif playerDic[player] == "BRK":
-        playerDic[player] = "BKN"
-    elif playerDic[player] == "CHO":
-        playerDic[player] = "CHA"
-
-    try:
-        addStuff(player, nba_teams[playerDic[player]], 3)
-    except:
-        continue
-    time.sleep((random.random() + 1.001) * 5)
+# for player in playerDic:
+#     if playerDic[player] == "PHO":
+#         playerDic[player] = "PHX"
+#     elif playerDic[player] == "BRK":
+#         playerDic[player] = "BKN"
+#     elif playerDic[player] == "CHO":
+#         playerDic[player] = "CHA"
+#
+#     try:
+#         addStuff(player, nba_teams[playerDic[player]], 3)
+#     except:
+#         continue
+#     time.sleep((random.random() + 1.001) * 5)
 
 # datF = pd.read_csv('/Users/ankul/Documents/myPlayers0.csv')
 # datF.insert(2, "NumGames", "2")
