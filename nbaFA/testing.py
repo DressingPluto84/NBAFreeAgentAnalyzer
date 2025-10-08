@@ -2,165 +2,144 @@ from typing import Dict
 import pandas as pd
 from datetime import date, datetime, timedelta
 
-
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                  "AppleWebKit/537.36 (KHTML, like Gecko) "
-                  "Chrome/120.0.0.0 Safari/537.36"
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/120.0.0.0 Safari/537.36"
+    )
 }
 
-def calculatePastNGamesFantasy(nameOfPlayer: str, numOfGames: int):
-    try:
-        url = f"https://www.basketball-reference.com/players/j/{nameOfPlayer}/gamelog/2025"
-    except:
-        print("Incorrect Player Name")
-        return
+
+def calculate_past_n_games_fantasy(player_id: str, num_games: int) -> float:
+    """
+    Calculate a player's average fantasy score over their past N games.
+    """
+    url = f"https://www.basketball-reference.com/players/j/{player_id}/gamelog/2025"
+
     try:
         data = pd.read_html(url)
-    except:
-        return
+    except Exception:
+        print(f"Error: Could not fetch data for {player_id}")
+        return 0.0
 
-    ds = data[7]
+    df = data[7]
+    stats = {
+        "PTS": 1, "TRB": 1, "AST": 2, "STL": 4, "BLK": 4,
+        "TOV": -2, "3P": 1, "FT": 1, "FG": 1, "FTA": -1, "FGA": -1
+    }
 
-    ptsArr = ds['PTS'].tail(numOfGames).to_numpy()
-    rebArr = ds['TRB'].tail(numOfGames).to_numpy()
-    astArr = ds['AST'].tail(numOfGames).to_numpy()
-    stlArr = ds['STL'].tail(numOfGames).to_numpy()
-    blkArr = ds['BLK'].tail(numOfGames).to_numpy()
-    tovArr = ds['TOV'].tail(numOfGames).to_numpy()
-    tpmArr = ds['3P'].tail(numOfGames).to_numpy()
-    ftmArr = ds['FT'].tail(numOfGames).to_numpy()
-    fgArr = ds['FG'].tail(numOfGames).to_numpy()
-    ftaArr = ds['FTA'].tail(numOfGames).to_numpy()
-    fgaArr = ds['FGA'].tail(numOfGames).to_numpy()
-
-    statVals = {}
-    for i in [-2, -1, 1, 2, 4]:
-        statVals[i] = []
-
-    statVals[-2].append(tovArr)
-    statVals[-1].extend([fgaArr, ftaArr])
-    statVals[1].extend([ptsArr, rebArr, tpmArr, ftmArr, fgArr])
-    statVals[2].append(astArr)
-    statVals[4].extend([stlArr, blkArr])
-
-    return calculateFantasyAvg(statVals, ptsArr)
+    stat_values = {k: df[k].tail(num_games).to_numpy() for k in stats if k in df.columns}
+    return calculate_fantasy_avg(stats, stat_values)
 
 
+def count_games(arr) -> int:
+    """Count valid (numeric) game entries."""
+    return sum(1 for x in arr if _is_number(x))
 
-def countGames(arr):
-    games = 0
 
-    for i in range(len(arr)):
-        try:
-            float(arr[i])
-            games += 1
-        except:
-            continue
+def sum_category(arr) -> int:
+    """Sum numeric values in an array, skipping invalid entries."""
+    return sum(int(x) for x in arr if _is_number(x))
 
-    return games
 
-def sumCategory(arr):
-    cat = 0
+def _is_number(x) -> bool:
+    try:
+        float(x)
+        return True
+    except (ValueError, TypeError):
+        return False
 
-    for i in range(len(arr)):
-        try:
-            val = int(arr[i])
-            cat += val
-        except:
-            continue
 
-    return cat
-
-def calculateFantasyAvg(dic: Dict, arr):
-    total = 0
-    games = countGames(arr)
-    for i in dic:
-        for j in dic[i]:
-            total += int(i) * sumCategory(j)
-
+def calculate_fantasy_avg(weights: Dict[str, int], stats: Dict[str, list]) -> float:
+    """
+    Compute average fantasy points per game given stat weights and values.
+    """
+    any_stat = next(iter(stats.values()))
+    games = count_games(any_stat)
     if games == 0:
-        return 0
+        return 0.0
+
+    total = sum(weights[k] * sum_category(v) for k, v in stats.items())
     return total / games
 
-def isPlayerInjured(player: str):
-    player = player.lower()
+
+def is_player_injured(player_name: str) -> bool:
+    """Return True if the player is listed as injured on Basketball Reference."""
     url = "https://www.basketball-reference.com/friv/injuries.fcgi"
-    data = pd.read_html(url)[0]['Player']
+    data = pd.read_html(url)[0]["Player"]
 
-    for i in data:
-        if player in i.lower():
-            return True
+    player_name = player_name.lower()
+    return any(player_name in name.lower() for name in data)
 
-    return False
 
-def findTopTwoPlayers(team: str):
+def find_top_two_players(team: str) -> list[str]:
+    """Return the top two players on the given team’s Basketball Reference page."""
     url = f"https://www.basketball-reference.com/teams/{team}/2025.html"
     data = pd.read_html(url)
-    topTwo = [data[1]['Player'][0], data[1]['Player'][1]]
-    return topTwo
+    return list(data[1]["Player"][:2])
 
-def getTeamRating(team: str):
+
+def get_team_rating(team: str) -> int:
+    """Return a team's standing position (1-based rank)."""
     url = "https://www.basketball-reference.com/leagues/NBA_2025_standings.html"
-    dataEast = pd.read_html(url)[0]['Eastern Conference']
-    dataWest = pd.read_html(url)[1]['Western Conference']
-    for i in range(len(dataEast)):
-        if team.lower() in dataEast[i].lower():
-            return i + 1
+    east, west = pd.read_html(url)[0]["Eastern Conference"], pd.read_html(url)[1]["Western Conference"]
 
-    for i in range(len(dataWest)):
-        if team.lower() in dataWest[i].lower():
+    for i, name in enumerate(east):
+        if team.lower() in name.lower():
+            return i + 1
+    for i, name in enumerate(west):
+        if team.lower() in name.lower():
             return i + 1
 
     return -1
 
-def getNextOpponents(team: str, start: date, numDays: int):
+
+def get_next_opponents(team: str, start_date: date, num_days: int):
+    """
+    Return a list of the team's opponents within the next `num_days` from `start_date`.
+    """
     url = f"https://www.basketball-reference.com/teams/{team}/2025_games.html"
-    general = pd.read_html(url)[0]
-    dates = pd.read_html(url)[0]['Date']
-    toDrop = []
-    for i in range(len(dates)):
-        if 'Date' in dates[i]:
-            toDrop.append(i)
-    dates.drop(index=toDrop, inplace=True)
-    general.drop(index=toDrop, inplace=True)
-    dates = dates.reset_index(drop=True)
-    general = general.reset_index(drop=True)
+    df = pd.read_html(url)[0]
 
-    i = 0
-    while i < len(dates) and start.strftime("%b %-d, %Y") not in dates[i]:
-        i += 1
-    start += timedelta(days=numDays)
+    dates = df["Date"].dropna().reset_index(drop=True)
+    opponents = df["Opponent"].reset_index(drop=True)
+
+    # Skip headers or invalid entries
+    valid_rows = [i for i, d in enumerate(dates) if "Date" not in str(d)]
+    dates = dates.iloc[valid_rows].reset_index(drop=True)
+    opponents = opponents.iloc[valid_rows].reset_index(drop=True)
+
+    start_date_str = start_date.strftime("%b %-d, %Y")
+    i = next((idx for idx, d in enumerate(dates) if start_date_str in d), len(dates))
+
+    end_date = start_date + timedelta(days=num_days)
     beginning = i
-    while i < len(dates) and datetime.strptime(dates[i][5:], "%b %d, %Y").date() < start:
+
+    while i < len(dates) and datetime.strptime(dates[i][5:], "%b %d, %Y").date() < end_date:
         i += 1
-    games = general['Opponent'][beginning:i]
 
-    return games
+    return opponents[beginning:i]
 
-def getPlayerBBName(nameOfPlayer):
-    nameOfPlayer = nameOfPlayer.lower().split(" ")
-    start = ""
-    start += nameOfPlayer[1][:5]
-    start += nameOfPlayer[0][:2]
-    start += "01"
-    return start
 
-def mainTestLoop():
-    nameOfPlayer = input("Enter name of player: ")
-    numOfGames = input("Enter number of past games to examine: ")
-    numOfGames = int(numOfGames) + 1
-    start = getPlayerBBName(nameOfPlayer)
-    print(calculatePastNGamesFantasy(start, numOfGames))
+def get_player_bbref_id(player_name: str) -> str:
+    """
+    Convert a player's full name to their Basketball Reference ID format.
+    Example: 'LeBron James' -> 'jamesle01'
+    """
+    first, last = player_name.lower().split()
+    return f"{last[:5]}{first[:2]}01"
 
-"""
-url = "https://www.basketball-reference.com/teams/OKC/2025_games.html"
-data = pd.read_html(url)
-print(len(data[0]['Date']))
-x = data[0]['Date'][0][5:]
-myDate = datetime.strptime(x, "%b %d, %Y").date()
-print(myDate.strftime("%b %d, %Y"))
-"""
 
-#myDate = datetime.strptime("Dec 19, 2024", "%b %d, %Y").date()
-#print(getNextOpponents("OKC", myDate, 5))
+def main():
+    """Simple CLI test."""
+    player_name = input("Enter player name: ")
+    num_games = int(input("Enter number of past games to examine: ")) + 1
+    player_id = get_player_bbref_id(player_name)
+
+    score = calculate_past_n_games_fantasy(player_id, num_games)
+    print(f"Average fantasy score over last {num_games - 1} games: {score:.2f}")
+
+
+if __name__ == "__main__":
+    main()
