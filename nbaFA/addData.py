@@ -1,4 +1,6 @@
 import pandas as pd
+import os
+import numpy as np
 import testing as t
 import time
 import random
@@ -59,8 +61,8 @@ nba_teams = {
 def getTeamFromPlayer(player: str):
     return getTeamName(playerDic[player])
 
-def getTeamAdvStats(player: str):
-    return dicTeamsStrength[getTeamFromPlayer(player)]
+def getTeamAdvStats(team: str):
+    return dicTeamsStrength[team]
 
 def addStuff(player, team, val):
     bbn = t.getPlayerBBName(player)
@@ -173,11 +175,60 @@ def getTeamName(abb):
     return nba_teams[abb]
 
 
-lstOfExtraStats = []
+
+
+arrDRTG = []
+arrDEFG = []
+arrDTOV = []
+arrDDREB = []
+arrDFTFGA = []
+
+# for play in playerDic:
+#     try:
+#         bbn = t.getPlayerBBName(play)
+#         url = f"https://www.basketball-reference.com/players/j/{bbn}/gamelog/2025"
+#         ds = pd.read_html(url)[7]
+#         ds = ds[ds['Team'] != 'Team']
+#         ds = ds[ds['PTS'] != 'Inactive']
+#         ds = ds[ds['PTS'] != 'Not With Team']
+#         ds = ds[ds['PTS'] != 'Did Not Dress']
+#
+#         opps = ds['Opp']
+#         opps = opps[opps != 'Opp']
+#         opps = opps.replace('PHO', 'PHX')
+#         opps = opps.replace('BRK', 'BKN')
+#         opps = opps.replace('CHO', 'CHA')
+#
+#         offset = 2
+#         for i in range(20):
+#             teamDLst = getTeamAdvStats(getTeamName(opps.to_numpy()[offset]))
+#             arrDRTG.append(teamDLst[0])
+#             arrDEFG.append(teamDLst[1])
+#             arrDTOV.append(teamDLst[2])
+#             arrDDREB.append(teamDLst[3])
+#             arrDFTFGA.append(teamDLst[4])
+#             offset += 2
+#         time.sleep((random.random() + 1) * 4)
+#     except Exception as e:
+#         print(e)
+#
+# np.savez("/Users/ankul/Documents/saveArr.npz", DRTG=arrDRTG, DTOV=arrDTOV, DEFG=arrDEFG, DDREB=arrDDREB, DFTFGA=arrDFTFGA)
+
 playerCSV = pd.read_csv("/Users/ankul/Documents/myPlayers.csv")
-bbn = t.getPlayerBBName("")
-offset = 0
-url = f"https://www.basketball-reference.com/players/j/{bbn}/gamelog/2025"
+playerCSV['DRTG'] = arrDRTG
+playerCSV['DTOV'] = arrDTOV
+playerCSV['DEFG'] = arrDEFG
+playerCSV['DDREB'] = arrDDREB
+playerCSV['DFTFGA'] = arrDFTFGA
+
+cols = playerCSV.columns.tolist()
+cols.insert(5, cols.pop(cols.index("DRTG")))
+cols.insert(6, cols.pop(cols.index("DTOV")))
+cols.insert(7, cols.pop(cols.index("DEFG")))
+cols.insert(8, cols.pop(cols.index("DDREB")))
+cols.insert(9, cols.pop(cols.index("DFTFGA")))
+playerCSV = playerCSV[cols]
+playerCSV.to_csv("/Users/ankul/Documents/myPlayersNewCol0.csv", index=False)
 
 # for player in playerDic:
 #     if playerDic[player] == "PHO":
