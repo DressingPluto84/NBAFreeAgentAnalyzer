@@ -1,0 +1,153 @@
+.player-square {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  min-height: 200px;
+  width: 100%;
+  max-width: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-square:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.player-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  position: relative;
+}
+
+.player-image-container {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.player-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.player-info {
+  width: 100%;
+}
+
+.player-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.player-position {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.player-team {
+  font-size: 0.85rem;
+  color: #888;
+  font-weight: 400;
+}
+
+.remove-player {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #ff4757;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0;
+}
+
+.player-square:hover .remove-player {
+  opacity: 1;
+}
+
+.remove-player:hover {
+  background: #ff3742;
+  transform: scale(1.1);
+}
+
+.empty-square {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  text-align: center;
+}
+
+.plus-icon {
+  font-size: 3rem;
+  font-weight: 300;
+  margin-bottom: 1rem;
+  color: #ccc;
+  transition: all 0.3s ease;
+}
+
+.player-square:hover .plus-icon {
+  color: #667eea;
+  transform: scale(1.1);
+}
+
+.empty-square p {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #999;
+}
+
+.player-square:hover .empty-square p {
+  color: #667eea;
+}
+
+@media (max-width: 768px) {
+  .player-square {
+    min-height: 160px;
+    padding: 1rem;
+  }
+  
+  .player-image-container {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 0.75rem;
+  }
+  
+  .player-name {
+    font-size: 1rem;
+  }
+  
+  .plus-icon {
+    font-size: 2.5rem;
+  }
+}
