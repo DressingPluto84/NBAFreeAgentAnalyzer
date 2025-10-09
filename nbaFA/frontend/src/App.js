@@ -32,6 +32,39 @@ function App() {
     setPlayers(newPlayers);
   };
 
+  const handleCalculate = async () => {
+    const selectedPlayers = players.filter(player => player !== null);
+    
+    if (selectedPlayers.length === 0) {
+      alert('Please select at least one player before calculating.');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:8000/players', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          players: selectedPlayers.map(player => player.name)
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Calculation result:', result);
+        // You can add more UI feedback here
+      } else {
+        console.error('Error:', response.statusText);
+        alert('Error calculating player analysis. Please try again.');
+      }
+    } catch (error) {
+      console.error('Network error:', error);
+      alert('Unable to connect to the backend server. Please make sure it is running.');
+    }
+  };
+
   return (
     <div className="App">
       <header className="app-header">
@@ -53,7 +86,7 @@ function App() {
         </div>
         
         <div className="calculate-section">
-          <button className="calculate-button" onClick={() => console.log('Calculate clicked!', players.filter(p => p !== null))}>
+          <button className="calculate-button" onClick={handleCalculate}>
             Calculate
           </button>
         </div>
