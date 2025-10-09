@@ -1,5 +1,5 @@
 import pandas as pd
-import testing as t
+import getCurrSeasonStats as t
 
 # --- Constants ---------------------------------------------------------------
 

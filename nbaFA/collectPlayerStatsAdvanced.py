@@ -4,7 +4,7 @@ import random
 import pandas as pd
 import numpy as np
 from unidecode import unidecode
-import testing as t  # custom module
+import getCurrSeasonStats as t  # custom module
 
 # --- File paths ---
 PLAYERS_CSV_PATH = "/Users/ankul/Documents/myPlayers0.csv"
