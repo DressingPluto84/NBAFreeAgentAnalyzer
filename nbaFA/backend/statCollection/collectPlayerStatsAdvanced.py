@@ -1,10 +1,6 @@
-import os
-import time
-import random
 import pandas as pd
-import numpy as np
 from unidecode import unidecode
-import getCurrSeasonStats as t  # custom module
+from backend.statCollection import getCurrSeasonStats as t
 
 # --- File paths ---
 PLAYERS_CSV_PATH = "/Users/ankul/Documents/myPlayers0.csv"
