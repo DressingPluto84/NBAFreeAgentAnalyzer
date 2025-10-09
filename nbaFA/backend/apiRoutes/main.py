@@ -18,16 +18,8 @@ def health():
 @app.post("/players")
 def players(request: PlayerRequest):
     player_names = request.players
-    print(f"Received players: {player_names}")
-    
-    # TODO: Add your analysis logic here
-    # For now, just return the received players
-    return {
-        "message": "Players received successfully",
-        "players": player_names,
-        "count": len(player_names)
-    }
+    print(player_names)
 
 @app.get("/stats")
 def stats():
-    return {"message": "Stats endpoint"}
+    return ""
